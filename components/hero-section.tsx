@@ -91,15 +91,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Призыв к действию */}
-        <div className="mt-8">
-          <button className="px-10 py-4 bg-[#a8b5a0] hover:bg-[#8fa38a] text-white font-medium rounded-full text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            Подтвердить присутствие
-          </button>
-          <p className="text-sm text-[#9a9a9a] mt-4">
-            Мы будем рады видеть вас на нашем празднике
-          </p>
-        </div>
+        {/* Блок "Подтвердить присутствие" УДАЛЕН */}
 
         {/* Декоративная стрелка вниз */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
