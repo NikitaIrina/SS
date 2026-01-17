@@ -11,14 +11,7 @@ export function FooterSection() {
       <div className="absolute inset-0 bg-white/70" />
 
       <div className="relative z-10 max-w-2xl mx-auto px-6">
-        {/* Couple photo */}
-        <div className="flex justify-center mb-8">
-          <img
-            src="/romantic-couple-holding-wildflowers-field-engageme.jpg"
-            alt="Никита и Ирина"
-            className="w-full max-w-md h-48 md:h-64 object-cover"
-          />
-        </div>
+        {/* Фото пары УДАЛЕНО */}
 
         {/* Message */}
         <p className="text-[#3d3d3d] italic mb-4 text-left">До скорой встречи! С любовью,</p>
