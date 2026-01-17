@@ -1,37 +1,3 @@
-Skip to content
-Navigation Menu
-Gonor13
-v0-wedding-website-design
-
-Type / to search
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-Settings
-v0-wedding-website-design/app/api/rsvp
-/route.ts
-Go to file
-t
-v0[bot]Gonor13
-v0[bot]
-and
-Gonor13
-feat: add Telegram notification API and update RSVP form
-6e1e5e3
- · 
-yesterday
-v0-wedding-website-design/app/api/rsvp
-/route.ts
-
-Code
-
-Blame
-72 lines (60 loc) · 2.23 KB
-export async function POST(request: Request) {
 import { NextResponse } from "next/server"
 
 interface RsvpData {
@@ -78,6 +44,12 @@ export async function POST(request: Request) {
 📍 *Присутствие:* ${attendanceText}
 👥 *Спутник:* ${companionText}
 🍷 *Напитки:* ${drinksText}
+
+📅 *Отправлено:* ${new Date().toLocaleString('ru-RU', {
+  timeZone: 'Europe/Moscow',
+  dateStyle: 'medium',
+  timeStyle: 'short'
+})}
     `.trim()
 
     // Send to Telegram
@@ -104,4 +76,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
   }
 }
-While the code is focused, press Alt+F1 for a menu of operations.
