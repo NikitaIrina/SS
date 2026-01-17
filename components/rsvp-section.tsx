@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Check, Loader2 } from "lucide-react"
@@ -41,18 +40,18 @@ export function RsvpSection() {
     console.log("🔄 Начинаем отправку...")
 
     try {
-      // Тестовые данные
       const payload = {
-        name: formData.name || "Тест Имя",
-        attendance: formData.attendance || "yes",
-        companion: formData.companion || "",
-        drinks: formData.drinks || [],
+        name: formData.name,
+        attendance: formData.attendance,
+        companion: formData.companion,
+        drinks: formData.drinks,
         timestamp: new Date().toISOString()
       }
 
       console.log("📤 Отправляем данные:", payload)
 
-      const API_URL = "/api/rsvp"
+      // ИСПРАВЛЕНО: Полный URL для production
+      const API_URL = "https://ss-henna.vercel.app/api/rsvp"
       console.log("🌐 URL запроса:", API_URL)
 
       const response = await fetch(API_URL, {
@@ -62,24 +61,36 @@ export function RsvpSection() {
           "Accept": "application/json"
         },
         body: JSON.stringify(payload),
+        mode: "cors" // Важно для cross-origin запросов
       })
 
       console.log("📩 Статус ответа:", response.status)
       console.log("📩 OK?", response.ok)
 
-      const result = await response.json()
-      console.log("📩 Ответ сервера:", result)
+      // Сначала читаем текст, потом парсим JSON
+      const responseText = await response.text()
+      console.log("📩 Ответ сервера (текст):", responseText)
 
-      if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`HTTP ошибка: ${response.status}`)
+      }
+
+      if (!responseText) {
+        throw new Error("Пустой ответ от сервера")
+      }
+
+      const result = JSON.parse(responseText)
+      console.log("📩 Ответ сервера (JSON):", result)
+
+      if (result.success) {
         console.log("✅ Успех!")
         setIsSubmitted(true)
       } else {
-        console.error("❌ Ошибка сервера:", result)
-        setError(`Ошибка сервера: ${result.error || response.status}`)
+        setError(`Ошибка сервера: ${result.error || "Неизвестная ошибка"}`)
       }
     } catch (err: any) {
       console.error("🔥 Критическая ошибка:", err)
-      setError(`Ошибка: ${err.message || "Неизвестная ошибка"}`)
+      setError(`Ошибка отправки: ${err.message || "Неизвестная ошибка"}`)
     } finally {
       console.log("🏁 Завершение отправки")
       setIsLoading(false)
@@ -106,14 +117,12 @@ export function RsvpSection() {
         <h2 className="text-xl md:text-3xl font-light tracking-[0.15em] uppercase text-rainbow text-center mb-6">
           Анкета гостя
         </h2>
-
         <p className="text-center text-[#6b6b6b] text-sm mb-2">
           Пожалуйста, подтвердите своё присутствие на мероприятии до:
         </p>
         <p className="text-center text-xl font-light tracking-[0.2em] text-[#3d3d3d] mb-10">
           06 / 02 / 2025
         </p>
-
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-10 shadow-sm">
           {/* Name */}
           <div className="mb-6">
@@ -127,7 +136,6 @@ export function RsvpSection() {
               required
             />
           </div>
-
           {/* Attendance */}
           <div className="mb-6">
             <label className="block text-sm text-[#3d3d3d] mb-3">Планируете ли Вы присутствовать?</label>
@@ -157,7 +165,6 @@ export function RsvpSection() {
               </label>
             </div>
           </div>
-
           {/* Companion */}
           <div className="mb-6">
             <label className="block text-sm text-[#3d3d3d] mb-2">
@@ -171,7 +178,6 @@ export function RsvpSection() {
               className="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg text-sm focus:outline-none focus:border-[#a8b5a0]"
             />
           </div>
-
           {/* Drinks */}
           <div className="mb-8">
             <label className="block text-sm text-[#3d3d3d] mb-3">Ваши предпочтения</label>
@@ -189,10 +195,8 @@ export function RsvpSection() {
               ))}
             </div>
           </div>
-
           {/* Error message */}
           {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-
           {/* Submit */}
           <div className="flex justify-center">
             <button
