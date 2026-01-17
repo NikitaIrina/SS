@@ -24,7 +24,7 @@ export function LocationSection() {
             
             <div className="mb-6">
               <p className="text-[#a8b5a0] font-medium text-lg">
-                * Сбор гостей - 16:00
+                * Сбор гостей - 17:30
               </p>
             </div>
             
@@ -79,7 +79,6 @@ export function LocationSection() {
                 Hedonist
               </p>
               <p className="text-sm text-[#6b6b6b]">
-                Элегантный ресторан на Покровском бульваре
               </p>
             </div>
           </div>
