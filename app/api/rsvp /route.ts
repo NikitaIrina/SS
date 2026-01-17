@@ -4,28 +4,30 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     
-    console.log("✅ RSVP данные получены:", data)
+    console.log("🎉 RSVP данные:", data)
     
+    // Возвращаем успех
     return NextResponse.json({ 
       success: true, 
-      message: "Данные получены успешно!",
-      receivedData: data,
-      timestamp: new Date().toISOString()
-    })
+      message: "Спасибо за ответ!",
+      timestamp: new Date().toISOString(),
+      data: data
+    }, { status: 200 })
     
   } catch (error) {
-    console.error("❌ Ошибка:", error)
+    console.error("❌ Ошибка API:", error)
     return NextResponse.json({ 
       success: false, 
-      error: "Server error" 
+      error: "Ошибка сервера" 
     }, { status: 500 })
   }
 }
 
 export async function GET() {
-  return NextResponse.json({
+  return NextResponse.json({ 
     status: "ok",
-    message: "RSVP API работает",
+    message: "RSVP API готов к работе",
+    methods: ["GET", "POST"],
     timestamp: new Date().toISOString()
   })
 }
