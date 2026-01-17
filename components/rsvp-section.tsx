@@ -1,7 +1,7 @@
 "use client"
 import type React from "react"
 import { useState } from "react"
-import { Check, Loader2 } from "lucide-react"
+import { Check, Loader2, Mail, Download } from "lucide-react"
 
 export function RsvpSection() {
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -9,7 +9,7 @@ export function RsvpSection() {
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     name: "",
-    attendance: "",
+    attendance: "yes",
     companion: "",
     drinks: [] as string[],
   })
@@ -37,63 +37,56 @@ export function RsvpSection() {
     setIsLoading(true)
     setError("")
 
-    console.log("🔄 Начинаем отправку...")
+    console.log("🔄 Отправляем форму...")
 
     try {
-      const payload = {
-        name: formData.name,
-        attendance: formData.attendance,
-        companion: formData.companion,
-        drinks: formData.drinks,
-        timestamp: new Date().toISOString()
+      // Проверка обязательных полей
+      if (!formData.name.trim()) {
+        throw new Error("Пожалуйста, введите ваше имя")
       }
 
-      console.log("📤 Отправляем данные:", payload)
-
-      // ИСПРАВЛЕНО: Полный URL для production
-      const API_URL = "https://ss-henna.vercel.app/api/rsvp"
-      console.log("🌐 URL запроса:", API_URL)
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(payload),
-        mode: "cors" // Важно для cross-origin запросов
-      })
-
-      console.log("📩 Статус ответа:", response.status)
-      console.log("📩 OK?", response.ok)
-
-      // Сначала читаем текст, потом парсим JSON
-      const responseText = await response.text()
-      console.log("📩 Ответ сервера (текст):", responseText)
-
-      if (!response.ok) {
-        throw new Error(`HTTP ошибка: ${response.status}`)
+      // Имитация отправки (1.5 секунды)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Формируем данные ответа
+      const submission = {
+        "👤 Имя": formData.name,
+        "✅ Присутствие": formData.attendance === "yes" ? "Да, с удовольствием" : "Не смогу",
+        "👥 Спутник": formData.companion || "Буду один(а)",
+        "🍷 Напитки": formData.drinks.map(id => drinks.find(d => d.id === id)?.label).filter(Boolean).join(", ") || "Не указано",
+        "📅 Дата ответа": new Date().toLocaleString("ru-RU"),
+        "🕒 Timestamp": new Date().toISOString()
       }
-
-      if (!responseText) {
-        throw new Error("Пустой ответ от сервера")
-      }
-
-      const result = JSON.parse(responseText)
-      console.log("📩 Ответ сервера (JSON):", result)
-
-      if (result.success) {
-        console.log("✅ Успех!")
-        setIsSubmitted(true)
-      } else {
-        setError(`Ошибка сервера: ${result.error || "Неизвестная ошибка"}`)
-      }
+      
+      console.log("🎉 Данные RSVP:", submission)
+      console.table(submission)
+      
+      // Сохраняем в localStorage для просмотра
+      localStorage.setItem('wedding_rsvp', JSON.stringify(submission, null, 2))
+      
+      // Показываем успех
+      setIsSubmitted(true)
+      
     } catch (err: any) {
-      console.error("🔥 Критическая ошибка:", err)
-      setError(`Ошибка отправки: ${err.message || "Неизвестная ошибка"}`)
+      console.error("❌ Ошибка:", err)
+      setError(err.message)
     } finally {
-      console.log("🏁 Завершение отправки")
       setIsLoading(false)
+    }
+  }
+
+  const downloadRSVPData = () => {
+    const data = localStorage.getItem('wedding_rsvp')
+    if (data) {
+      const blob = new Blob([data], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `rsvp-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
     }
   }
 
@@ -105,7 +98,46 @@ export function RsvpSection() {
             <Check className="text-white" size={32} />
           </div>
           <h2 className="text-2xl font-light tracking-[0.1em] uppercase text-[#3d3d3d] mb-4">Спасибо!</h2>
-          <p className="text-[#6b6b6b]">Мы получили ваш ответ. До встречи на свадьбе!</p>
+          <p className="text-[#6b6b6b] mb-6">Мы получили ваш ответ. До встречи на свадьбе!</p>
+          
+          <div className="mt-8 p-6 bg-white rounded-xl shadow-sm border border-[#e5e5e5]">
+            <h3 className="text-lg font-light text-[#3d3d3d] mb-4">📋 Ваш ответ сохранен</h3>
+            
+            <div className="space-y-3 text-left mb-6">
+              <p className="text-sm"><span className="font-medium">Имя:</span> {formData.name}</p>
+              <p className="text-sm"><span className="font-medium">Присутствие:</span> {formData.attendance === "yes" ? "✅ Да, с удовольствием" : "❌ Не смогу"}</p>
+              {formData.companion && <p className="text-sm"><span className="font-medium">Спутник:</span> {formData.companion}</p>}
+              {formData.drinks.length > 0 && (
+                <p className="text-sm"><span className="font-medium">Напитки:</span> {formData.drinks.map(id => drinks.find(d => d.id === id)?.label).join(", ")}</p>
+              )}
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={downloadRSVPData}
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-[#5a7247] text-[#5a7247] rounded-lg hover:bg-[#5a7247] hover:text-white transition-colors"
+              >
+                <Download size={16} />
+                Скачать данные (JSON)
+              </button>
+              
+              <button
+                onClick={() => {
+                  const subject = "RSVP Ответ: " + formData.name
+                  const body = `Имя: ${formData.name}%0D%0AПрисутствие: ${formData.attendance === "yes" ? "Да" : "Нет"}%0D%0AСпутник: ${formData.companion || "Нет"}%0D%0AНапитки: ${formData.drinks.map(id => drinks.find(d => d.id === id)?.label).join(", ") || "Не указано"}%0D%0A%0D%0AДата ответа: ${new Date().toLocaleString("ru-RU")}`
+                  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${body}`)
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Mail size={16} />
+                Отправить себе на email
+              </button>
+            </div>
+            
+            <p className="text-xs text-gray-500 mt-4">
+              💡 Данные также сохранены в Console (F12) и localStorage
+            </p>
+          </div>
         </div>
       </section>
     )
@@ -207,6 +239,9 @@ export function RsvpSection() {
               {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Отправить"}
             </button>
           </div>
+          <p className="text-center text-xs text-gray-500 mt-6">
+            ⚠️ Временно: данные сохраняются локально. Для сбора ответов настройте Google Forms.
+          </p>
         </form>
       </div>
     </section>
