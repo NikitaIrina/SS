@@ -4,12 +4,13 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     
-    console.log("✅ Данные получены:", data)
+    console.log("✅ RSVP данные получены:", data)
     
-    // Просто возвращаем успех для теста
     return NextResponse.json({ 
       success: true, 
-      message: "Данные получены успешно!"
+      message: "Данные получены успешно!",
+      receivedData: data,
+      timestamp: new Date().toISOString()
     })
     
   } catch (error) {
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    message: "RSVP API работает"
+    message: "RSVP API работает",
+    timestamp: new Date().toISOString()
   })
 }
