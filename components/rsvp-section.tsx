@@ -1,181 +1,78 @@
-"use client"
+import { NextResponse } from "next/server"
 
-import type React from "react"
-import { useState } from "react"
-import { Check, Loader2 } from "lucide-react"
+interface RsvpData {
+  name: string
+  attendance: string
+  companion: string
+  drinks: string[]
+}
 
-export function RsvpSection() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [formData, setFormData] = useState({
-    name: "",
-    attendance: "",
-    companion: "",
-    drinks: [] as string[],
-  })
+const drinkLabels: Record<string, string> = {
+  champagne: "Шампанское",
+  "white-wine": "Белое вино",
+  "red-wine": "Красное вино",
+  whiskey: "Виски",
+  vodka: "Водка",
+  gin: "Джин",
+  rum: "Ром",
+  "no-alcohol": "Не пью алкоголь",
+}
 
-  const drinks = [
-    { id: "champagne", label: "Шампанское" },
-    { id: "white-wine", label: "Белое вино" },
-    { id: "red-wine", label: "Красное вино" },
-    { id: "whiskey", label: "Виски" },
-    { id: "vodka", label: "Водка" },
-    { id: "gin", label: "Джин" },
-    { id: "rum", label: "Ром" },
-    { id: "no-alcohol", label: "Не пью алкоголь" },
-  ]
+export async function POST(request: Request) {
+  try {
+    const data: RsvpData = await request.json()
 
-  const handleDrinkChange = (drinkId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      drinks: prev.drinks.includes(drinkId) ? prev.drinks.filter((d) => d !== drinkId) : [...prev.drinks, drinkId],
-    }))
-  }
+    const botToken = process.env.TELEGRAM_BOT_TOKEN
+    const chatId = process.env.TELEGRAM_CHAT_ID
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const response = await fetch("/api/rsvp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setIsSubmitted(true)
-      } else {
-        setError("Произошла ошибка. Попробуйте ещё раз.")
-      }
-    } catch {
-      setError("Не удалось отправить. Проверьте подключение к интернету.")
-    } finally {
-      setIsLoading(false)
+    if (!botToken || !chatId) {
+      console.error("Missing Telegram credentials")
+      return NextResponse.json({ success: false, error: "Server configuration error" }, { status: 500 })
     }
+
+    // Format drinks list
+    const drinksText = data.drinks.length > 0 ? data.drinks.map((d) => drinkLabels[d] || d).join(", ") : "Не выбрано"
+
+    // Create Telegram message
+    const attendanceText = data.attendance === "yes" ? "✅ Да, придёт" : "❌ Не сможет"
+    const companionText = data.companion ? data.companion : "Без спутника"
+
+    const message = `
+🎊 *Новый ответ на анкету свадьбы!*
+
+👤 *Имя:* ${data.name}
+📍 *Присутствие:* ${attendanceText}
+👥 *Спутник:* ${companionText}
+🍷 *Напитки:* ${drinksText}
+
+📅 *Отправлено:* ${new Date().toLocaleString('ru-RU', {
+  timeZone: 'Europe/Moscow',
+  dateStyle: 'medium',
+  timeStyle: 'short'
+})}
+    `.trim()
+
+    // Send to Telegram
+    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`
+    const response = await fetch(telegramUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error("Telegram API error:", errorData)
+      return NextResponse.json({ success: false, error: "Failed to send notification" }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("RSVP submission error:", error)
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
   }
-
-  if (isSubmitted) {
-    return (
-      <section className="py-20 bg-[#f5f4f2]">
-        <div className="max-w-md mx-auto px-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#5a7247] flex items-center justify-center mx-auto mb-6">
-            <Check className="text-white" size={32} />
-          </div>
-          <h2 className="text-2xl font-light tracking-[0.1em] uppercase text-[#3d3d3d] mb-4">Спасибо!</h2>
-          <p className="text-[#6b6b6b]">Мы получили ваш ответ. До встречи на свадьбе!</p>
-        </div>
-      </section>
-    )
-  }
-
-  return (
-    <section className="py-20 bg-[#f5f4f2]">
-      <div className="max-w-xl mx-auto px-6">
-        <h2 className="text-xl md:text-3xl font-light tracking-[0.15em] uppercase text-rainbow text-center mb-6">
-          Анкета гостя
-        </h2>
-
-        <p className="text-center text-[#6b6b6b] text-sm mb-2">
-          Пожалуйста, подтвердите своё присутствие на мероприятии до:
-        </p>
-        <p className="text-center text-xl font-light tracking-[0.2em] text-[#3d3d3d] mb-10">06 / 02 / 2025</p>
-
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-10 shadow-sm">
-          {/* Name */}
-          <div className="mb-6">
-            <label className="block text-sm text-[#3d3d3d] mb-2">Пожалуйста, подтвердите Ваше присутствие:</label>
-            <input
-              type="text"
-              placeholder="Имя и Фамилия"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg text-sm focus:outline-none focus:border-[#a8b5a0]"
-              required
-            />
-          </div>
-
-          {/* Attendance */}
-          <div className="mb-6">
-            <label className="block text-sm text-[#3d3d3d] mb-3">Планируете ли Вы присутствовать?</label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="attendance"
-                  value="yes"
-                  checked={formData.attendance === "yes"}
-                  onChange={(e) => setFormData({ ...formData, attendance: e.target.value })}
-                  className="w-4 h-4 accent-[#5a7247]"
-                  required
-                />
-                <span className="text-sm text-[#6b6b6b]">Да, с удовольствием</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="attendance"
-                  value="no"
-                  checked={formData.attendance === "no"}
-                  onChange={(e) => setFormData({ ...formData, attendance: e.target.value })}
-                  className="w-4 h-4 accent-[#5a7247]"
-                />
-                <span className="text-sm text-[#6b6b6b]">Не смогу</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Companion */}
-          <div className="mb-6">
-            <label className="block text-sm text-[#3d3d3d] mb-2">
-              Если Вы будете не одни, пожалуйста, заполните поле ниже:
-            </label>
-            <input
-              type="text"
-              placeholder="Имя и Фамилия Вашего спутника/спутницы"
-              value={formData.companion}
-              onChange={(e) => setFormData({ ...formData, companion: e.target.value })}
-              className="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg text-sm focus:outline-none focus:border-[#a8b5a0]"
-            />
-          </div>
-
-          {/* Drinks */}
-          <div className="mb-8">
-            <label className="block text-sm text-[#3d3d3d] mb-3">Ваши предпочтения</label>
-            <div className="grid grid-cols-2 gap-3">
-              {drinks.map((drink) => (
-                <label key={drink.id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.drinks.includes(drink.id)}
-                    onChange={() => handleDrinkChange(drink.id)}
-                    className="w-4 h-4 accent-[#5a7247] rounded"
-                  />
-                  <span className="text-sm text-[#6b6b6b]">{drink.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Error message */}
-          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-
-          {/* Submit */}
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-32 h-32 rounded-full border border-[#d4d4d4] text-xs tracking-[0.1em] uppercase text-[#6b6b6b] hover:border-[#5a7247] hover:text-[#5a7247] transition-colors disabled:opacity-50 flex items-center justify-center"
-            >
-              {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Отправить"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-  )
 }
