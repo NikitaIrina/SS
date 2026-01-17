@@ -2,35 +2,28 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
-    // Получаем данные
     const data = await request.json()
     
-    console.log("📥 Получены данные RSVP:", data)
+    console.log("✅ Данные получены:", data)
     
-    // Просто возвращаем успех (без Telegram для теста)
+    // Просто возвращаем успех для теста
     return NextResponse.json({ 
       success: true, 
-      message: "✅ Данные успешно получены!",
-      timestamp: new Date().toISOString(),
-      receivedData: data
+      message: "Данные получены успешно!"
     })
     
   } catch (error) {
-    console.error("❌ Ошибка RSVP:", error)
+    console.error("❌ Ошибка:", error)
     return NextResponse.json({ 
       success: false, 
-      error: "Server error",
-      details: String(error)
+      error: "Server error" 
     }, { status: 500 })
   }
 }
 
-// Добавь GET для теста
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    endpoint: "rsvp",
-    description: "RSVP API endpoint",
-    timestamp: new Date().toISOString()
+    message: "RSVP API работает"
   })
 }
