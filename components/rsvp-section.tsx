@@ -83,7 +83,7 @@ export function RsvpSection() {
         <p className="text-center text-[#6b6b6b] text-sm mb-2">
           Пожалуйста, подтвердите своё присутствие на мероприятии до:
         </p>
-        <p className="text-center text-xl font-light tracking-[0.2em] text-[#3d3d3d] mb-10">01 / 02 / 26</p>
+        <p className="text-center text-xl font-light tracking-[0.2em] text-[#3d3d3d] mb-10">06 / 02 / 2025</p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-10 shadow-sm">
           {/* Name */}
