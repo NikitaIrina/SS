@@ -1,7 +1,7 @@
 "use client"
 import type React from "react"
 import { useState } from "react"
-import { Check, Loader2, Sparkles, Heart, Bell } from "lucide-react"
+import { Check, Loader2, Sparkles, Heart } from "lucide-react"
 
 export function RsvpSection() {
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -63,39 +63,29 @@ ${drinksText}
 
 📅 *Дата ответа:* ${new Date().toLocaleDateString("ru-RU")}
 🕒 *Время:* ${new Date().toLocaleTimeString("ru-RU", { hour: '2-digit', minute: '2-digit' })}
-
-_С уважением,_
-_Свадебный сайт_
       `.trim()
 
-      console.log("📤 Отправляем в Telegram...")
-
-      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      // Тихий запрос к Telegram (без показа ошибок пользователю)
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
           text: message,
           parse_mode: 'Markdown',
-          disable_notification: false
         })
+      }).then(r => r.json()).then(data => {
+        console.log("📨 Сообщение отправлено в Telegram:", data.ok ? "✅" : "❌")
+      }).catch(err => {
+        console.log("📨 Не удалось отправить в Telegram (неважно)")
       })
 
-      const result = await response.json()
-      
-      if (result.ok) {
-        console.log("✅ Успешно отправлено в Telegram!")
-        setIsSubmitted(true)
-      } else {
-        console.error("❌ Ошибка Telegram:", result.description || result)
-        setIsSubmitted(true)
-      }
+      // Всегда успех для гостя
+      setIsSubmitted(true)
 
     } catch (error) {
-      console.error("🔥 Критическая ошибка:", error)
+      // Тихая ошибка
+      console.log("Произошла ошибка, но всё ок")
       setIsSubmitted(true)
     } finally {
       setIsLoading(false)
@@ -106,68 +96,68 @@ _Свадебный сайт_
     return (
       <section className="py-24 bg-gradient-to-b from-[#f9f7f4] to-[#f5f4f2]">
         <div className="max-w-lg mx-auto px-6 text-center">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#5a7247] to-[#7a9560] flex items-center justify-center mx-auto mb-8 shadow-lg">
-              <Check className="text-white" size={40} />
+          {/* Анимированная иконка успеха */}
+          <div className="relative mb-10">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#5a7247] to-[#7a9560] flex items-center justify-center mx-auto shadow-xl animate-pulse">
+              <Check className="text-white" size={56} />
             </div>
-            <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-white border-4 border-[#f5f4f2] flex items-center justify-center shadow-md">
-              <Sparkles className="text-[#5a7247]" size={16} />
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/90 border-4 border-[#f5f4f2] flex items-center justify-center shadow-lg">
+              <Sparkles className="text-[#5a7247]" size={24} />
             </div>
           </div>
           
-          <h2 className="text-3xl font-light tracking-[0.15em] uppercase text-[#3d3d3d] mb-6">
-            Спасибо за ответ!
+          {/* Главное сообщение */}
+          <h2 className="text-4xl font-light tracking-[0.1em] uppercase text-[#3d3d3d] mb-8">
+            Благодарим вас!
           </h2>
           
-          <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-white/50 shadow-sm">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white px-4 py-1 rounded-full border border-[#e5e5e5] text-sm text-[#5a7247]">
-              Ваш ответ
-            </div>
+          {/* Персональное сообщение */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-10 mb-10 border border-white/60 shadow-lg">
+            <p className="text-xl font-light text-[#3d3d3d] mb-6">
+              Дорогой(ая) <span className="text-[#5a7247] font-medium">{formData.name}</span>,
+            </p>
             
-            <div className="space-y-4 text-center">
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5]">
-                  <span className="text-xl">👤</span>
+            <p className="text-[#6b6b6b] mb-8 leading-relaxed">
+              {formData.attendance === "yes" 
+                ? "Мы невероятно рады, что вы сможете разделить с нами этот особенный день! Ваше присутствие делает нашу свадьбу ещё прекраснее."
+                : "Мы сожалеем, что вы не сможете быть с нами, но понимаем и ценим, что нашли время ответить. Обязательно поделимся с вами фотографиями!"}
+            </p>
+            
+            {/* Детали ответа (красиво) */}
+            <div className="space-y-6 border-t border-[#f0f0f0] pt-8">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5] flex-shrink-0">
+                  <span className="text-lg">👰‍♀️🤵‍♂️</span>
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-[#6b6b6b]">Гость</p>
-                  <p className="text-lg font-light text-[#3d3d3d]">{formData.name}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5]">
-                  <span className="text-xl">
-                    {formData.attendance === "yes" ? "✅" : "❌"}
-                  </span>
-                </div>
-                <div className="text-left">
-                  <p className="text-xs text-[#6b6b6b]">Присутствие</p>
+                  <p className="text-sm text-[#6b6b6b]">Ваш ответ</p>
                   <p className="text-lg font-light text-[#3d3d3d]">
-                    {formData.attendance === "yes" ? "Буду с удовольствием" : "К сожалению, не смогу"}
+                    {formData.attendance === "yes" 
+                      ? "С радостью приду на вашу свадьбу" 
+                      : "К сожалению, не смогу присутствовать"}
                   </p>
                 </div>
               </div>
               
               {formData.companion && (
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5]">
-                    <span className="text-xl">👥</span>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5] flex-shrink-0">
+                    <span className="text-lg">👥</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-xs text-[#6b6b6b]">Со спутником</p>
+                    <p className="text-sm text-[#6b6b6b]">Сопровождает</p>
                     <p className="text-lg font-light text-[#3d3d3d]">{formData.companion}</p>
                   </div>
                 </div>
               )}
               
               {formData.drinks.length > 0 && (
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5]">
-                    <span className="text-xl">🍷</span>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#f9f7f4] flex items-center justify-center border border-[#e5e5e5] flex-shrink-0">
+                    <span className="text-lg">🥂</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-xs text-[#6b6b6b]">Напитки</p>
+                    <p className="text-sm text-[#6b6b6b]">Ваши предпочтения</p>
                     <p className="text-lg font-light text-[#3d3d3d]">
                       {formData.drinks.map(id => drinks.find(d => d.id === id)?.label).join(", ")}
                     </p>
@@ -177,33 +167,34 @@ _Свадебный сайт_
             </div>
           </div>
           
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100 mb-6">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <Bell className="w-5 h-5 text-green-600" />
-              </div>
-              <h3 className="text-lg font-light text-green-800">Ответ отправлен!</h3>
-            </div>
-            <p className="text-sm text-green-700 mb-2">
-              Уведомление получено в Telegram
-            </p>
-            <p className="text-xs text-green-600">
+          {/* Заключительное сообщение */}
+          <div className="space-y-6">
+            <p className="text-[#6b6b6b] italic text-lg">
               {formData.attendance === "yes" 
-                ? "Ждём вас с нетерпением на нашей свадьбе!" 
-                : "Спасибо, что дали знать!"}
+                ? "С нетерпением ждём встречи 6 февраля 2025 года!" 
+                : "Желаем вам всего наилучшего и надеемся увидеться в ближайшее время!"}
             </p>
-          </div>
-          
-          <div className="flex items-center justify-center gap-3 text-[#5a7247]">
-            <Heart size={18} className="fill-current" />
-            <span className="text-lg font-light">До встречи!</span>
-            <Heart size={18} className="fill-current" />
+            
+            <div className="flex items-center justify-center gap-6">
+              <div className="w-20 h-px bg-gradient-to-r from-transparent via-[#5a7247] to-transparent"></div>
+              <div className="flex items-center gap-3 text-[#5a7247]">
+                <Heart size={24} className="fill-current animate-pulse" />
+                <span className="text-2xl font-light">С любовью</span>
+                <Heart size={24} className="fill-current animate-pulse" />
+              </div>
+              <div className="w-20 h-px bg-gradient-to-r from-transparent via-[#5a7247] to-transparent"></div>
+            </div>
+            
+            <p className="text-sm text-[#8b8b8b] mt-8">
+              Алёна и Никита
+            </p>
           </div>
         </div>
       </section>
     )
   }
 
+  // Форма остается без изменений (используй предыдущий красивый JSX)
   return (
     <section className="py-24 bg-gradient-to-b from-white to-[#f9f7f4]">
       <div className="max-w-2xl mx-auto px-6">
@@ -227,7 +218,6 @@ _Свадебный сайт_
         </div>
         
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-8 md:p-12 shadow-lg border border-[#f0f0f0]">
-          {/* Name */}
           <div className="mb-8">
             <label className="block text-sm text-[#3d3d3d] mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-[#f9f7f4] border border-[#e5e5e5] flex items-center justify-center text-xs">1</span>
@@ -243,7 +233,6 @@ _Свадебный сайт_
             />
           </div>
           
-          {/* Attendance */}
           <div className="mb-8">
             <label className="block text-sm text-[#3d3d3d] mb-4 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-[#f9f7f4] border border-[#e5e5e5] flex items-center justify-center text-xs">2</span>
@@ -309,7 +298,6 @@ _Свадебный сайт_
             </div>
           </div>
           
-          {/* Companion */}
           <div className="mb-8">
             <label className="block text-sm text-[#3d3d3d] mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-[#f9f7f4] border border-[#e5e5e5] flex items-center justify-center text-xs">3</span>
@@ -324,7 +312,6 @@ _Свадебный сайт_
             />
           </div>
           
-          {/* Drinks */}
           <div className="mb-10">
             <label className="block text-sm text-[#3d3d3d] mb-4 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-[#f9f7f4] border border-[#e5e5e5] flex items-center justify-center text-xs">4</span>
@@ -358,7 +345,6 @@ _Свадебный сайт_
             </div>
           </div>
           
-          {/* Submit Button */}
           <div className="flex justify-center">
             <button
               type="submit"
@@ -385,7 +371,6 @@ _Свадебный сайт_
             </button>
           </div>
           
-          {/* Декоративный элемент */}
           <div className="text-center mt-10">
             <div className="inline-flex items-center gap-4 text-xs text-[#6b6b6b]">
               <div className="w-16 h-px bg-[#e5e5e5]"></div>
