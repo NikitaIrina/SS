@@ -186,7 +186,7 @@ ${drinksText}
             </div>
             
             <p className="text-sm text-[#8b8b8b] mt-8">
-              Алёна и Никита
+              Ира и Никита
             </p>
           </div>
         </div>
