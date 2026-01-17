@@ -1,31 +1,36 @@
+import { NextResponse } from "next/server"
+
 export async function POST(request: Request) {
   try {
+    // Получаем данные
     const data = await request.json()
     
-    console.log('✅ Данные получены:', data)
+    console.log("📥 Получены данные RSVP:", data)
     
-    // ВРЕМЕННО ОТКЛЮЧИТЕ TELEGRAM
-    /*
-    const botToken = process.env.TELEGRAM_BOT_TOKEN
-    const chatId = process.env.TELEGRAM_CHAT_ID
-    
-    if (!botToken || !chatId) {
-      console.error("Missing Telegram credentials")
-      return NextResponse.json({ success: false, error: "Server configuration error" }, { status: 500 })
-    }
-    
-    // ... остальной код Telegram
-    */
-    
-    // ПРОСТО ВОЗВРАЩАЕМ УСПЕХ
+    // Просто возвращаем успех (без Telegram для теста)
     return NextResponse.json({ 
       success: true, 
-      message: 'Данные получены (Telegram временно отключен)',
-      receivedData: data 
+      message: "✅ Данные успешно получены!",
+      timestamp: new Date().toISOString(),
+      receivedData: data
     })
     
   } catch (error) {
-    console.error("RSVP error:", error)
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
+    console.error("❌ Ошибка RSVP:", error)
+    return NextResponse.json({ 
+      success: false, 
+      error: "Server error",
+      details: String(error)
+    }, { status: 500 })
   }
+}
+
+// Добавь GET для теста
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    endpoint: "rsvp",
+    description: "RSVP API endpoint",
+    timestamp: new Date().toISOString()
+  })
 }
