@@ -4,7 +4,7 @@ import { CountdownSection } from "@/components/countdown-section"
 import { CalendarSection } from "@/components/calendar-section"
 import { TimelineSection } from "@/components/timeline-section"
 import { LocationSection } from "@/components/location-section"
-import RsvpSection from "@/components/rsvp-section"
+import { RsvpSection } from "@/components/rsvp-section"
 import { FooterSection } from "@/components/footer-section"
 
 export default function WeddingPage() {
