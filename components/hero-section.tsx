@@ -86,7 +86,6 @@ export function HeroSection() {
             
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-[#3d3d3d]">МОСКВА</div>
-              <div className="text-sm text-[#9a9a9a]">РЕСТОРАН</div>
             </div>
           </div>
         </div>
