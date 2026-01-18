@@ -39,7 +39,7 @@ export function TimelineSection() {
                 style={{ 
                   color: event.color,
                   borderColor: event.color,
-                  backgroundColor: `${event.color}20` // 20 = 12% opacity
+                  backgroundColor: `${event.color}20`
                 }}
               >
                 <event.icon size={38} strokeWidth={1.5} />
@@ -61,11 +61,16 @@ export function TimelineSection() {
           ))}
         </div>
         
-        {/* Декоративная линия */}
-        <div className="mt-16 pt-8 border-t border-[#e5e5e5]">
-          <p className="text-sm text-[#6b6b6b]">
+        {/* Декоративная линия с увеличенным текстом */}
+        <div className="mt-16 pt-10 border-t-2 border-[#e5e5e5]">
+          <p className="text-2xl md:text-3xl font-light italic text-[#5a7247]">
             Мы с нетерпением ждём встречи с вами
           </p>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <div className="w-12 h-0.5 bg-[#e5e5e5]"></div>
+            <div className="w-2 h-2 rounded-full bg-[#5a7247]"></div>
+            <div className="w-12 h-0.5 bg-[#e5e5e5]"></div>
+          </div>
         </div>
       </div>
     </section>
