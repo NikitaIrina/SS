@@ -171,7 +171,7 @@ ${drinksText}
           <div className="space-y-6">
             <p className="text-[#6b6b6b] italic text-lg">
               {formData.attendance === "yes" 
-                ? "С нетерпением ждём встречи 6 февраля 2025 года!" 
+                ? "С нетерпением ждём встречи 6 марта 2026 года!" 
                 : "Желаем вам всего наилучшего и надеемся увидеться в ближайшее время!"}
             </p>
             
@@ -211,7 +211,7 @@ ${drinksText}
             Пожалуйста, подтвердите своё присутствие до:
           </p>
           <p className="text-2xl font-light tracking-[0.2em] text-[#3d3d3d] mb-10">
-            06 · 02 · 2025
+            06 · 02 · 2026
           </p>
           
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-[#5a7247] to-transparent mx-auto"></div>
